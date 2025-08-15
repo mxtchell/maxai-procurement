@@ -105,10 +105,11 @@ if __name__ == '__main__':
     # Test the skill with mock input
     try:
         print("Testing Price Variance Deep Dive skill...")
+        # Test without filters (filters will be ignored for now)
         mock_input = price_variance_deep_dive.create_input(
             arguments={
                 'time_periods': ['q3 2025'],
-                'other_filters': "category: cleaning"
+                'other_filters': "operatingUnit: western"  # This should find "West Ops" with proper grounding
             }
         )
         print("Mock input created successfully")

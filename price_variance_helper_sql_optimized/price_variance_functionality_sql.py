@@ -12,6 +12,7 @@ from skill_framework.skills import ExportData
 from skill_framework.layouts import wire_layout
 from answer_rocket import AnswerRocketClient
 from ar_analytics.helpers.utils import get_dataset_id
+from ar_analytics import DriverAnalysisTemplateParameterSetup
 from price_variance_helper_sql_optimized.price_variance_config import FINAL_PROMPT_TEMPLATE
 
 logger = logging.getLogger(__name__)
@@ -90,58 +91,26 @@ def build_time_filter(parameters: SkillInput) -> str:
     
     return f"({' OR '.join(time_conditions)})" if time_conditions else "1=1"
 
-def build_other_filters(parameters: SkillInput) -> str:
-    """Build additional filter SQL from other_filters parameter"""
+def build_other_filters_with_grounding(parameters: SkillInput) -> str:
+    """
+    TODO: Implement proper ar_analytics filter grounding integration
+    
+    The correct approach is to:
+    1. Use DriverAnalysis to get properly grounded filters from the platform
+    2. Let the platform handle semantic matching (dusting->cleaning, western->West Ops) 
+    3. Extract the grounded filter conditions and convert to our SQL format
+    
+    For now, returning empty string to avoid breaking the platform's intelligence
+    with custom parsing that only works for literal matches.
+    """
     filters = parameters.arguments.other_filters if hasattr(parameters.arguments, 'other_filters') else None
     
-    if not filters or filters == ['None']:
-        return ""
+    if filters:
+        logger.info(f"⚠️  FILTERS IGNORED: {filters}")
+        logger.info("   Custom filter parsing removed - need to implement proper ar_analytics integration")
+        logger.info("   Skill will show unfiltered data until integration is complete")
     
-    # Handle string format - convert exact matches to LIKE for fuzzy matching
-    if isinstance(filters, str):
-        # Handle "category: value" pattern (with colon) - convert to LIKE for fuzzy matching
-        if "category:" in filters.lower():
-            import re
-            match = re.search(r"category:\s*([^\s,]+)", filters, re.IGNORECASE)
-            if match:
-                value = match.group(1)
-                return f" AND LOWER(category) LIKE '%{value.lower()}%'"
-        # Handle "category='X'" or "category = 'X'" pattern - convert to LIKE for fuzzy matching
-        elif "category" in filters.lower() and "=" in filters and "'" in filters:
-            import re
-            match = re.search(r"category\s*=\s*'([^']*)'", filters, re.IGNORECASE)
-            if match:
-                value = match.group(1)
-                return f" AND LOWER(category) LIKE '%{value.lower()}%'"
-        # Otherwise assume it's properly formatted
-        return f" AND {filters}"
-    
-    # Handle list format
-    elif isinstance(filters, list):
-        filter_conditions = []
-        for f in filters:
-            if isinstance(f, str):
-                filter_conditions.append(f)
-            elif isinstance(f, dict):
-                # Handle grounded format like {'val': ['Electronics']} 
-                if 'val' in f and isinstance(f['val'], list):
-                    # This is the grounded format - extract values and build LOWER() IN clause
-                    values = f['val']
-                    if values:
-                        # Assume it's category filter and use LOWER() for case-insensitive matching
-                        quoted_values = [f"'{v.lower()}'" for v in values]
-                        filter_conditions.append(f"LOWER(category) IN ({', '.join(quoted_values)})")
-                # Handle dict format like {'dim': 'category', 'op': '=', 'val': 'Electronics'}
-                elif 'dim' in f and 'op' in f and 'val' in f:
-                    val = f['val']
-                    # Add quotes if it's a string value
-                    if isinstance(val, str) and not val.startswith("'"):
-                        val = f"'{val}'"
-                    filter_conditions.append(f"{f['dim']} {f['op']} {val}")
-        
-        if filter_conditions:
-            return f" AND ({' AND '.join(filter_conditions)})"
-    
+    # Return empty for now - better to show unfiltered results than break semantic matching
     return ""
 
 def run_price_variance_analysis_sql(parameters: SkillInput) -> SkillOutput:
@@ -150,7 +119,7 @@ def run_price_variance_analysis_sql(parameters: SkillInput) -> SkillOutput:
     try:
         arc = AnswerRocketClient()
         time_filter = build_time_filter(parameters)
-        other_filter = build_other_filters(parameters)
+        other_filter = build_other_filters_with_grounding(parameters)
         
         # Combine filters
         full_filter = time_filter + other_filter

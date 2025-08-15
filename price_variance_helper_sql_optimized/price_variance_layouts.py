@@ -14,6 +14,50 @@ price_variance_layouts = {
             },
             "children": [
                 {
+                    "name": "FlexContainer_Header",
+                    "type": "FlexContainer",
+                    "children": "",
+                    "minHeight": "80px",
+                    "direction": "column",
+                    "style": {
+                        "backgroundColor": "#3b82f6",
+                        "padding": "20px",
+                        "borderRadius": "8px",
+                        "marginBottom": "20px"
+                    },
+                    "label": "FlexContainer-Header"
+                },
+                {
+                    "name": "Header_Title",
+                    "type": "Header",
+                    "children": "",
+                    "text": "Supplier Variance Overview",
+                    "style": {
+                        "fontSize": "24px",
+                        "fontWeight": "bold",
+                        "color": "#ffffff",
+                        "textAlign": "left",
+                        "margin": "0"
+                    },
+                    "parentId": "FlexContainer_Header",
+                    "label": "Header-Main_Title"
+                },
+                {
+                    "name": "Header_Subtitle",
+                    "type": "Header",
+                    "children": "",
+                    "text": "Price Variance Analysis Across All Suppliers",
+                    "style": {
+                        "fontSize": "16px",
+                        "fontWeight": "normal",
+                        "color": "#e5e7eb",
+                        "textAlign": "left",
+                        "marginTop": "5px"
+                    },
+                    "parentId": "FlexContainer_Header",
+                    "label": "Header-Subtitle"
+                },
+                {
                     "name": "Paragraph0",
                     "type": "Paragraph",
                     "children": "",
@@ -613,6 +657,50 @@ price_variance_layouts = {
             },
             "children": [
                 {
+                    "name": "FlexContainer_Header2",
+                    "type": "FlexContainer",
+                    "children": "",
+                    "minHeight": "80px",
+                    "direction": "column",
+                    "style": {
+                        "backgroundColor": "#dc2626",
+                        "padding": "20px",
+                        "borderRadius": "8px",
+                        "marginBottom": "20px"
+                    },
+                    "label": "FlexContainer-Header2"
+                },
+                {
+                    "name": "Header2_Title",
+                    "type": "Header",
+                    "children": "",
+                    "text": "Contract Analysis",
+                    "style": {
+                        "fontSize": "24px",
+                        "fontWeight": "bold",
+                        "color": "#ffffff",
+                        "textAlign": "left",
+                        "margin": "0"
+                    },
+                    "parentId": "FlexContainer_Header2",
+                    "label": "Header-Main_Title"
+                },
+                {
+                    "name": "Header2_Subtitle",
+                    "type": "Header",
+                    "children": "",
+                    "text": "Top Supplier Contract Analysis (All Contracts)",
+                    "style": {
+                        "fontSize": "16px",
+                        "fontWeight": "normal",
+                        "color": "#fecaca",
+                        "textAlign": "left",
+                        "marginTop": "5px"
+                    },
+                    "parentId": "FlexContainer_Header2",
+                    "label": "Header-Subtitle"
+                },
+                {
                     "name": "Header1",
                     "type": "Header",
                     "children": "",
@@ -1017,6 +1105,50 @@ price_variance_layouts = {
                 "gap": "15px"
             },
             "children": [
+                {
+                    "name": "FlexContainer_Header3",
+                    "type": "FlexContainer",
+                    "children": "",
+                    "minHeight": "80px",
+                    "direction": "column",
+                    "style": {
+                        "backgroundColor": "#059669",
+                        "padding": "20px",
+                        "borderRadius": "8px",
+                        "marginBottom": "20px"
+                    },
+                    "label": "FlexContainer-Header3"
+                },
+                {
+                    "name": "Header3_Title",
+                    "type": "Header",
+                    "children": "",
+                    "text": "Recovery Pipeline",
+                    "style": {
+                        "fontSize": "24px",
+                        "fontWeight": "bold",
+                        "color": "#ffffff",
+                        "textAlign": "left",
+                        "margin": "0"
+                    },
+                    "parentId": "FlexContainer_Header3",
+                    "label": "Header-Main_Title"
+                },
+                {
+                    "name": "Header3_Subtitle",
+                    "type": "Header",
+                    "children": "",
+                    "text": "Variance Recovery Tracking & Timeline",
+                    "style": {
+                        "fontSize": "16px",
+                        "fontWeight": "normal",
+                        "color": "#a7f3d0",
+                        "textAlign": "left",
+                        "marginTop": "5px"
+                    },
+                    "parentId": "FlexContainer_Header3",
+                    "label": "Header-Subtitle"
+                },
                 {
                     "name": "Header0",
                     "type": "Header",

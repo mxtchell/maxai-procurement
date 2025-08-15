@@ -321,7 +321,6 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
         }],
         "chart_categories": supplier_df.head(5)['supplierName'].tolist() if not supplier_df.empty else ["No Data"],
         "chart_title": "Top 5 Suppliers by Variance",
-        "chart_section_title": "Supplier Variance Overview",
         
         # Table data
         "data": supplier_table_df.values.tolist() if not supplier_table_df.empty else [],
@@ -371,7 +370,6 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
                 "data": [int(x) for x in contract_df.head(5)['variance_amount'].tolist()]
             }],
             "chart_title": f"Top 5 Contracts by Variance - {top_supplier}",
-            "chart_section_title": "Contract Variance Analysis",
             
             # Table data - top 5 contracts
             "data": contract_table_df.values.tolist(),

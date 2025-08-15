@@ -323,20 +323,6 @@ price_variance_layouts = {
                     "extraStyles": "gap: 15px"
                 },
                 {
-                    "name": "Header_Chart_Title1",
-                    "type": "Header",
-                    "children": "",
-                    "text": "Supplier Variance Overview",
-                    "style": {
-                        "fontSize": "18px",
-                        "fontWeight": "600",
-                        "color": "#374151",
-                        "marginTop": "20px",
-                        "marginBottom": "15px"
-                    },
-                    "label": "Header-Chart_Title1"
-                },
-                {
                     "name": "HighchartsChart0",
                     "type": "HighchartsChart",
                     "children": "",
@@ -635,17 +621,6 @@ price_variance_layouts = {
                         "fieldName": "columns"
                     }
                 ]
-            },
-            {
-                "name": "chart_section_title",
-                "isRequired": false,
-                "defaultValue": null,
-                "targets": [
-                    {
-                        "elementName": "Header_Chart_Title1",
-                        "fieldName": "text"
-                    }
-                ]
             }
         ]
     }""",
@@ -837,20 +812,6 @@ price_variance_layouts = {
                         "color": "#1f2937"
                     },
                     "parentId": "FlexContainer3"
-                },
-                {
-                    "name": "Header_Chart_Title2",
-                    "type": "Header",
-                    "children": "",
-                    "text": "Contract Variance Analysis",
-                    "style": {
-                        "fontSize": "18px",
-                        "fontWeight": "600",
-                        "color": "#374151",
-                        "marginTop": "20px",
-                        "marginBottom": "15px"
-                    },
-                    "label": "Header-Chart_Title2"
                 },
                 {
                     "name": "HighchartsChart0",
@@ -1061,17 +1022,6 @@ price_variance_layouts = {
                     {
                         "elementName": "HighchartsChart0",
                         "fieldName": "options.title.text"
-                    }
-                ]
-            },
-            {
-                "name": "chart_section_title",
-                "isRequired": false,
-                "defaultValue": null,
-                "targets": [
-                    {
-                        "elementName": "Header_Chart_Title2",
-                        "fieldName": "text"
                     }
                 ]
             }

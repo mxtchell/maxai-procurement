@@ -12,7 +12,7 @@ from skill_framework.skills import ExportData
 from skill_framework.layouts import wire_layout
 from answer_rocket import AnswerRocketClient
 from ar_analytics.helpers.utils import get_dataset_id
-from ar_analytics import DriverAnalysisTemplateParameterSetup
+from ar_analytics import DriverAnalysis, DriverAnalysisTemplateParameterSetup
 from price_variance_helper_sql_optimized.price_variance_config import FINAL_PROMPT_TEMPLATE
 
 logger = logging.getLogger(__name__)
@@ -91,26 +91,128 @@ def build_time_filter(parameters: SkillInput) -> str:
     
     return f"({' OR '.join(time_conditions)})" if time_conditions else "1=1"
 
-def build_other_filters_with_grounding(parameters: SkillInput) -> str:
+def build_other_filters(parameters: SkillInput) -> tuple[str, list]:
     """
-    TODO: Implement proper ar_analytics filter grounding integration
-    
-    The correct approach is to:
-    1. Use DriverAnalysis to get properly grounded filters from the platform
-    2. Let the platform handle semantic matching (dusting->cleaning, western->West Ops) 
-    3. Extract the grounded filter conditions and convert to our SQL format
-    
-    For now, returning empty string to avoid breaking the platform's intelligence
-    with custom parsing that only works for literal matches.
+    Build SQL filters directly from other_filters parameter
+    Returns: (filter_sql, param_info_list)
     """
-    filters = parameters.arguments.other_filters if hasattr(parameters.arguments, 'other_filters') else None
+    filters = parameters.arguments.other_filters if hasattr(parameters.arguments, 'other_filters') else []
+    periods = parameters.arguments.time_periods if hasattr(parameters.arguments, 'time_periods') else []
     
+    logger.info(f"🔍 Building filters from other_filters: {filters}")
+    
+    # Create basic param info for the pills
+    param_info = [
+        ParameterDisplayDescription(key="metric", value="Metric: priceVarianceAmount"),
+        ParameterDisplayDescription(key="breakouts", value="Breakouts: supplierName, contractName"),
+    ]
+    
+    if periods:
+        time_display = ", ".join([str(p) for p in periods])
+        param_info.append(ParameterDisplayDescription(key="period", value=f"Time Period: {time_display}"))
+    
+    # Handle different filter formats
+    filter_sql = ""
     if filters:
-        logger.info(f"⚠️  FILTERS IGNORED: {filters}")
-        logger.info("   Custom filter parsing removed - need to implement proper ar_analytics integration")
-        logger.info("   Skill will show unfiltered data until integration is complete")
+        filter_conditions = []
+        
+        # Handle string format like "operatingUnit: western"
+        if isinstance(filters, str):
+            filter_str = filters.strip()
+            if ':' in filter_str:
+                parts = filter_str.split(':', 1)
+                if len(parts) == 2:
+                    column = parts[0].strip()
+                    value = parts[1].strip()
+                    # Simple mapping for common filter values
+                    if 'western' in value.lower():
+                        filter_conditions.append("operatingUnit = 'West Ops'")
+                    else:
+                        filter_conditions.append(f"{column} = '{value}'")
+            
+            filter_display = filters
+        
+        # Handle list format
+        elif isinstance(filters, list):
+            for filter_item in filters:
+                if isinstance(filter_item, str) and ':' in filter_item:
+                    parts = filter_item.split(':', 1)
+                    if len(parts) == 2:
+                        column = parts[0].strip()
+                        value = parts[1].strip()
+                        # Simple mapping for common filter values
+                        if 'western' in value.lower():
+                            filter_conditions.append("operatingUnit = 'West Ops'")
+                        else:
+                            filter_conditions.append(f"{column} = '{value}'")
+            
+            filter_display = ', '.join([str(f) for f in filters])
+        
+        else:
+            filter_display = str(filters)
+        
+        # Build SQL from conditions
+        if filter_conditions:
+            filter_sql = f" AND ({' AND '.join(filter_conditions)})"
+            logger.info(f"✅ Built filter SQL: {filter_sql}")
+        
+        # Add filter info to param display
+        param_info.append(ParameterDisplayDescription(key="filters", value=f"Filters: {filter_display}"))
     
-    # Return empty for now - better to show unfiltered results than break semantic matching
+    return filter_sql, param_info
+
+def convert_grounded_filters_to_sql(grounded_filters: list) -> str:
+    """Convert platform-grounded filters to SQL format for our optimized queries"""
+    if not grounded_filters:
+        return ""
+    
+    filter_conditions = []
+    
+    for filter_item in grounded_filters:
+        try:
+            if isinstance(filter_item, dict):
+                # Handle standard filter format: {'dim': 'category', 'op': '=', 'val': ['Cleaning Consumables']}
+                if 'dim' in filter_item and 'op' in filter_item and 'val' in filter_item:
+                    dim = filter_item['dim']
+                    op = filter_item['op']
+                    val = filter_item['val']
+                    
+                    if op == '=' and isinstance(val, list):
+                        # Multiple values - use IN clause
+                        if len(val) == 1:
+                            filter_conditions.append(f"{dim} = '{val[0]}'")
+                        else:
+                            quoted_vals = [f"'{v}'" for v in val]
+                            filter_conditions.append(f"{dim} IN ({', '.join(quoted_vals)})")
+                    elif op == '=' and isinstance(val, str):
+                        filter_conditions.append(f"{dim} = '{val}'")
+                    elif op in ['>', '<', '>=', '<='] and isinstance(val, (int, float, str)):
+                        filter_conditions.append(f"{dim} {op} {val}")
+                    else:
+                        # Handle other operators
+                        val_str = f"'{val}'" if isinstance(val, str) else str(val)
+                        filter_conditions.append(f"{dim} {op} {val_str}")
+                        
+                # Handle other filter formats that might come from the platform
+                elif 'column' in filter_item and 'values' in filter_item:
+                    column = filter_item['column'] 
+                    values = filter_item['values']
+                    if isinstance(values, list):
+                        if len(values) == 1:
+                            filter_conditions.append(f"{column} = '{values[0]}'")
+                        else:
+                            quoted_vals = [f"'{v}'" for v in values]
+                            filter_conditions.append(f"{column} IN ({', '.join(quoted_vals)})")
+                    
+        except Exception as e:
+            logger.warning(f"Could not parse filter item {filter_item}: {e}")
+            continue
+    
+    if filter_conditions:
+        result = f" AND ({' AND '.join(filter_conditions)})"
+        logger.info(f"🎯 Converted grounded filters to SQL: {result}")
+        return result
+    
     return ""
 
 def run_price_variance_analysis_sql(parameters: SkillInput) -> SkillOutput:
@@ -119,10 +221,12 @@ def run_price_variance_analysis_sql(parameters: SkillInput) -> SkillOutput:
     try:
         arc = AnswerRocketClient()
         time_filter = build_time_filter(parameters)
-        other_filter = build_other_filters_with_grounding(parameters)
+        
+        # Build filters directly from other_filters parameter
+        other_filter_sql, param_info = build_other_filters(parameters)
         
         # Combine filters
-        full_filter = time_filter + other_filter
+        full_filter = time_filter + other_filter_sql
         
         logger.info("=== SQL OPTIMIZED: Starting analysis with 3 efficient queries ===")
         
@@ -258,7 +362,7 @@ def run_price_variance_analysis_sql(parameters: SkillInput) -> SkillOutput:
         logger.info("🎉 SQL OPTIMIZED: All queries complete - generating visualizations...")
         
         # Generate visualizations using the query results
-        return generate_visualizations(supplier_df, contract_df, kpi_data, top_supplier, parameters)
+        return generate_visualizations(supplier_df, contract_df, kpi_data, top_supplier, parameters, param_info)
         
     except Exception as e:
         logger.error(f"SQL-optimized analysis failed: {e}")
@@ -267,7 +371,7 @@ def run_price_variance_analysis_sql(parameters: SkillInput) -> SkillOutput:
         return create_empty_output(f"Analysis failed: {str(e)}")
 
 def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame, 
-                          kpi_data: dict, top_supplier: str, parameters: SkillInput) -> SkillOutput:
+                          kpi_data: dict, top_supplier: str, parameters: SkillInput, param_info: list) -> SkillOutput:
     """Generate visualizations from SQL query results"""
     
     visualizations = []
@@ -487,34 +591,8 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
         top_opportunities=top_opportunities
     )
     
-    # Generate parameter display descriptions for the pills at bottom
-    param_info = []
-    
-    # Metric pill
-    param_info.append(ParameterDisplayDescription(key="metric", value="Metric: priceVarianceAmount"))
-    
-    # Breakouts pill  
-    param_info.append(ParameterDisplayDescription(key="breakouts", value="Breakouts: supplierName, contractName"))
-    
-    # Time period pill
-    periods = parameters.arguments.time_periods if hasattr(parameters.arguments, 'time_periods') else []
-    if periods:
-        time_display = ", ".join([str(p) for p in periods])
-    else:
-        time_display = "All Time" 
-    param_info.append(ParameterDisplayDescription(key="period", value=f"Time Period: {time_display}"))
-    
-    # Filters pill (if any)
-    filters = parameters.arguments.other_filters if hasattr(parameters.arguments, 'other_filters') else []
-    if filters and filters != ['None']:
-        # Handle both string and list formats
-        if isinstance(filters, str):
-            filter_display = filters
-        elif isinstance(filters, list):
-            filter_display = ', '.join([str(f) for f in filters])
-        else:
-            filter_display = str(filters)
-        param_info.append(ParameterDisplayDescription(key="filters", value=f"Filters: {filter_display}"))
+    # Use the param_info already generated by build_other_filters()
+    # No need to regenerate since it's already complete
     
     # Prepare export data
     export_data = {

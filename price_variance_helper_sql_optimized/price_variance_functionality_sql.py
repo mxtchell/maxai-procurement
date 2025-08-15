@@ -97,9 +97,8 @@ def build_other_filters(parameters: SkillInput) -> str:
     if not filters or filters == ['None']:
         return ""
     
-    # Handle string format like "category = 'Electronics'"
+    # Handle string format - assume it's already properly formatted SQL
     if isinstance(filters, str):
-        # Clean up the filter string and return it as a SQL condition
         return f" AND {filters}"
     
     # Handle list format
@@ -327,7 +326,7 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
         "col_defs": [{"name": col} for col in supplier_table_df.columns] if not supplier_table_df.empty else [],
         
         # Insights
-        "exec_summary": generate_insights_markdown_clean(kpi_data, supplier_df, top_supplier)
+        "exec_summary": "Analysis insights will be generated dynamically by the LLM using the insight_prompt parameter."
     }
     
     rendered_page1 = wire_layout(json.loads(parameters.arguments.page_1_layout), page1_vars)
@@ -375,7 +374,7 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
             "data": contract_table_df.values.tolist(),
             "col_defs": [{"name": col} for col in contract_table_df.columns],
             
-            "exec_summary": generate_contract_insights_clean(contract_df, top_supplier, total_contract_variance)
+            "exec_summary": "Contract analysis insights will be generated dynamically by the LLM using the insight_prompt parameter."
         }
         
         rendered_page2 = wire_layout(json.loads(parameters.arguments.page_2_layout), page2_vars)
@@ -701,54 +700,6 @@ def generate_contract_insights(contract_df: pd.DataFrame, supplier_name: str, to
 **Note**: KPIs reflect ALL {len(contract_df)} contracts, table shows top 5 for focus
 """
 
-def generate_insights_markdown_clean(kpi_data: dict, supplier_df: pd.DataFrame, top_supplier: str) -> str:
-    """Generate insights for supplier analysis without redundant title"""
-    insights = f"""
-- **Total Variance Impact**: {format_currency_short(kpi_data['total_variance'])} across {kpi_data['total_suppliers']} suppliers
-- **Top Opportunity**: {top_supplier} with {format_currency_short(supplier_df.iloc[0]['total_variance']) if not supplier_df.empty else '$0'} variance
-- **Compliance Rate**: {kpi_data['compliance_rate']:.1f}% price compliance achieved
-
-## Top Suppliers by Variance
-"""
-    
-    if not supplier_df.empty:
-        for i, (_, row) in enumerate(supplier_df.head(3).iterrows(), 1):
-            insights += f"{i}. **{row['supplierName']}**: {format_currency_short(row['total_variance'])} ({row['variance_pct']:.1f}%)\n"
-    
-    insights += """
-## Strategic Recommendations
-
-1. **Focus Negotiations**: Target top variance suppliers for immediate cost savings
-2. **Price Monitoring**: Implement automated alerts for high-risk categories  
-3. **Supplier Consolidation**: Leverage volume for better pricing power
-4. **Compliance Improvement**: Address the {:.0f}% non-compliance gap
-""".format(100 - kpi_data['compliance_rate'])
-    
-    return insights
-
-def generate_contract_insights_clean(contract_df: pd.DataFrame, supplier_name: str, total_variance: float) -> str:
-    """Generate insights for contract analysis without redundant title"""
-    top_contract = contract_df.iloc[0]['contractName'] if not contract_df.empty else "N/A"
-    top_contract_variance = format_currency_short(contract_df.iloc[0]['variance_amount']) if not contract_df.empty else "$0"
-    
-    return f"""
-- **Total Contract Variance**: {format_currency_short(total_variance)} (ALL contracts)
-- **Number of Contracts**: {len(contract_df)}
-- **Top Contract**: {top_contract} ({top_contract_variance})
-
-## Key Findings:
-1. **Concentrated Risk**: Variance concentrated in specific high-impact contracts
-2. **Renegotiation Opportunity**: Terms review needed for consistent overpayments
-3. **Contract Consolidation**: Leverage volume across fewer agreements
-4. **Compliance Monitoring**: Enhanced tracking needed for outlier contracts
-
-## Action Items:
-- **Priority 1**: Review and renegotiate top 3 variance contracts
-- **Priority 2**: Implement contract-level price alerts
-- **Priority 3**: Assess consolidation opportunities
-
-**Note**: KPIs reflect ALL {len(contract_df)} contracts, table shows top 5 for focus
-"""
 
 def generate_top_opportunities(supplier_df: pd.DataFrame) -> str:
     """Generate bullet points for top opportunities"""

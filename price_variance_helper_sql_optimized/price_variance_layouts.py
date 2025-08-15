@@ -31,7 +31,7 @@ price_variance_layouts = {
                     "name": "Header_Title",
                     "type": "Header",
                     "children": "",
-                    "text": "Supplier Variance Overview",
+                    "text": "All Suppliers Analysis",
                     "style": {
                         "fontSize": "24px",
                         "fontWeight": "bold",
@@ -674,7 +674,7 @@ price_variance_layouts = {
                     "name": "Header2_Title",
                     "type": "Header",
                     "children": "",
-                    "text": "Contract Analysis",
+                    "text": "All Contracts Analysis",
                     "style": {
                         "fontSize": "24px",
                         "fontWeight": "bold",

@@ -108,8 +108,16 @@ def build_other_filters(parameters: SkillInput) -> str:
             if isinstance(f, str):
                 filter_conditions.append(f)
             elif isinstance(f, dict):
+                # Handle grounded format like {'val': ['Electronics']} 
+                if 'val' in f and isinstance(f['val'], list):
+                    # This is the grounded format - extract values and build LOWER() IN clause
+                    values = f['val']
+                    if values:
+                        # Assume it's category filter and use LOWER() for case-insensitive matching
+                        quoted_values = [f"'{v.lower()}'" for v in values]
+                        filter_conditions.append(f"LOWER(category) IN ({', '.join(quoted_values)})")
                 # Handle dict format like {'dim': 'category', 'op': '=', 'val': 'Electronics'}
-                if 'dim' in f and 'op' in f and 'val' in f:
+                elif 'dim' in f and 'op' in f and 'val' in f:
                     val = f['val']
                     # Add quotes if it's a string value
                     if isinstance(val, str) and not val.startswith("'"):
@@ -326,7 +334,7 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
         "col_defs": [{"name": col} for col in supplier_table_df.columns] if not supplier_table_df.empty else [],
         
         # Insights
-        "exec_summary": "Analysis insights will be generated dynamically by the LLM using the insight_prompt parameter."
+        "exec_summary": ""
     }
     
     rendered_page1 = wire_layout(json.loads(parameters.arguments.page_1_layout), page1_vars)
@@ -374,7 +382,7 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
             "data": contract_table_df.values.tolist(),
             "col_defs": [{"name": col} for col in contract_table_df.columns],
             
-            "exec_summary": "Contract analysis insights will be generated dynamically by the LLM using the insight_prompt parameter."
+            "exec_summary": ""
         }
         
         rendered_page2 = wire_layout(json.loads(parameters.arguments.page_2_layout), page2_vars)

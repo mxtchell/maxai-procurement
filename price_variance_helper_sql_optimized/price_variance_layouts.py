@@ -644,7 +644,7 @@ price_variance_layouts = {
                     "minHeight": "80px",
                     "direction": "column",
                     "style": {
-                        "backgroundColor": "#dc2626",
+                        "backgroundColor": "#7c3aed",
                         "padding": "20px",
                         "borderRadius": "8px",
                         "marginBottom": "20px"

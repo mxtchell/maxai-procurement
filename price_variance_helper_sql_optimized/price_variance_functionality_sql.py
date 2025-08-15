@@ -99,8 +99,8 @@ def build_other_filters(parameters: SkillInput) -> str:
     
     # Handle string format - convert exact matches to LIKE for fuzzy matching
     if isinstance(filters, str):
-        # Handle "category = 'X'" pattern - convert to LIKE for fuzzy matching
-        if "category = '" in filters.lower():
+        # Handle "category='X'" or "category = 'X'" pattern - convert to LIKE for fuzzy matching
+        if "category" in filters.lower() and "=" in filters and "'" in filters:
             import re
             match = re.search(r"category\s*=\s*'([^']*)'", filters, re.IGNORECASE)
             if match:

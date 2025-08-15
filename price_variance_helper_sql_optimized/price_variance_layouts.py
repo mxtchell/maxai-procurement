@@ -613,19 +613,6 @@ price_variance_layouts = {
             },
             "children": [
                 {
-                    "name": "Header0",
-                    "type": "Header",
-                    "children": "",
-                    "text": "Contract Deep Dive",
-                    "style": {
-                        "fontSize": "24px",
-                        "fontWeight": "bold",
-                        "textAlign": "center",
-                        "color": "#1f2937"
-                    },
-                    "label": "Header-Main_Title"
-                },
-                {
                     "name": "Header1",
                     "type": "Header",
                     "children": "",
@@ -795,7 +782,7 @@ price_variance_layouts = {
                             "backgroundColor": "#f8fafc"
                         },
                         "title": {
-                            "text": "Top 5 Contracts by Variance",
+                            "text": "Top 5 Contracts by Variance - {top_supplier}",
                             "style": {
                                 "fontSize": "16px"
                             }

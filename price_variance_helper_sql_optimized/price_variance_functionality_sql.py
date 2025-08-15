@@ -310,7 +310,7 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
         # KPIs
         "kpi1_value": format_currency_short(kpi_data['total_variance']),
         "kpi2_value": f"{kpi_data['compliance_rate']:.1f}%",
-        "kpi3_value": f"{kpi_data['total_suppliers']}",
+        "kpi3_value": f"{int(kpi_data['total_suppliers'])}",
         "kpi4_value": f"{kpi_data['avg_variance_rate']:.1f}%", 
         "kpi5_value": format_currency_short(kpi_data['total_invoice_value']),
         

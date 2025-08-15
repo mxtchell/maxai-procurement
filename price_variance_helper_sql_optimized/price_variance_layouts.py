@@ -405,25 +405,6 @@ price_variance_layouts = {
                     "extraStyles": "border-radius: 8px"
                 },
                 {
-                    "name": "Header0",
-                    "type": "Header",
-                    "children": "",
-                    "text": "Price Variance Deep Dive",
-                    "style": {
-                        "fontSize": "20px",
-                        "fontWeight": "normal",
-                        "textAlign": "left",
-                        "verticalAlign": "start",
-                        "color": "#000000",
-                        "border": "none",
-                        "textDecoration": "none",
-                        "writingMode": "horizontal-tb"
-                    },
-                    "parentId": "FlexContainer0",
-                    "flex": "shrink",
-                    "label": "Header-Main_Title"
-                },
-                {
                     "name": "Markdown0",
                     "type": "Markdown",
                     "children": "",
@@ -701,19 +682,6 @@ price_variance_layouts = {
                     "label": "Header-Subtitle"
                 },
                 {
-                    "name": "Header1",
-                    "type": "Header",
-                    "children": "",
-                    "text": "Top Supplier Contract Analysis", 
-                    "style": {
-                        "fontSize": "18px",
-                        "fontWeight": "600",
-                        "color": "#374151",
-                        "marginTop": "10px"
-                    },
-                    "label": "Header-Subtitle"
-                },
-                {
                     "name": "FlexContainer0",
                     "type": "FlexContainer",
                     "children": "",
@@ -846,20 +814,6 @@ price_variance_layouts = {
                     "parentId": "FlexContainer3"
                 },
                 {
-                    "name": "Header2",
-                    "type": "Header",
-                    "children": "",
-                    "text": "Top Variance Opportunities",
-                    "style": {
-                        "fontSize": "18px",
-                        "fontWeight": "600",
-                        "color": "#374151",
-                        "marginTop": "30px",
-                        "marginBottom": "15px"
-                    },
-                    "label": "Header-Chart_Title"
-                },
-                {
                     "name": "HighchartsChart0",
                     "type": "HighchartsChart",
                     "children": "",
@@ -901,25 +855,6 @@ price_variance_layouts = {
                     },
                     "label": "HighchartsChart-Contracts",
                     "extraStyles": "border-radius: 8px;"
-                },
-                {
-                    "name": "Header3",
-                    "type": "Header",
-                    "children": "",
-                    "text": "Contract Analysis for EcoBox Packaging",
-                    "style": {
-                        "fontSize": "20px",
-                        "fontWeight": "normal",
-                        "textAlign": "left",
-                        "verticalAlign": "start",
-                        "color": "#000000",
-                        "border": "none",
-                        "textDecoration": "none",
-                        "writingMode": "horizontal-tb"
-                    },
-                    "parentId": "FlexContainer4",
-                    "flex": "shrink",
-                    "label": "Header-Insights_Title"
                 },
                 {
                     "name": "Markdown0",
@@ -1080,13 +1015,13 @@ price_variance_layouts = {
                 ]
             },
             {
-                "name": "headline",
+                "name": "chart_title",
                 "isRequired": false,
                 "defaultValue": null,
                 "targets": [
                     {
-                        "elementName": "Header3",
-                        "fieldName": "text"
+                        "elementName": "HighchartsChart0",
+                        "fieldName": "options.title.text"
                     }
                 ]
             }
@@ -1147,32 +1082,6 @@ price_variance_layouts = {
                         "marginTop": "5px"
                     },
                     "parentId": "FlexContainer_Header3",
-                    "label": "Header-Subtitle"
-                },
-                {
-                    "name": "Header0",
-                    "type": "Header",
-                    "children": "",
-                    "text": "Recovery Pipeline",
-                    "style": {
-                        "fontSize": "24px",
-                        "fontWeight": "bold",
-                        "textAlign": "center",
-                        "color": "#1f2937"
-                    },
-                    "label": "Header-Main_Title"
-                },
-                {
-                    "name": "Header1",
-                    "type": "Header",
-                    "children": "",
-                    "text": "Price Variance Recovery Tracking & Opportunities",
-                    "style": {
-                        "fontSize": "18px",
-                        "fontWeight": "600",
-                        "color": "#374151",
-                        "marginTop": "10px"
-                    },
                     "label": "Header-Subtitle"
                 },
                 {
@@ -1347,20 +1256,6 @@ price_variance_layouts = {
                         "color": "#1f2937"
                     },
                     "parentId": "FlexContainer4"
-                },
-                {
-                    "name": "Header2",
-                    "type": "Header",
-                    "children": "",
-                    "text": "Recovery Timeline",
-                    "style": {
-                        "fontSize": "18px",
-                        "fontWeight": "600",
-                        "color": "#374151",
-                        "marginTop": "30px",
-                        "marginBottom": "15px"
-                    },
-                    "label": "Header-Timeline_Title"
                 },
                 {
                     "name": "HighchartsChart0",

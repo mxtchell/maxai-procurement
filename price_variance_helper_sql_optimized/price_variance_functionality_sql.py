@@ -356,7 +356,6 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
         total_contracts = len(contract_df)
         
         page2_vars = {
-            "headline": f"Contract Analysis - {top_supplier}",
             "sub_headline": f"Contract-level variance analysis for {top_supplier}",
             
             # KPIs - ALL contracts 
@@ -370,6 +369,7 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
                 "name": "Contract Variance",
                 "data": [int(x) for x in contract_df.head(5)['variance_amount'].tolist()]
             }],
+            "chart_title": f"Top 5 Contracts by Variance - {top_supplier}",
             
             # Table data - top 5 contracts
             "data": contract_table_df.values.tolist(),

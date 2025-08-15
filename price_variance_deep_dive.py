@@ -22,6 +22,7 @@ from ar_analytics.defaults import default_table_layout
         ),
         SkillParameter(
             name="other_filters",
+            constrained_to="filters",
             description="Additional filters like supplier, category, contract, etc."
         ),
         SkillParameter(
@@ -107,7 +108,7 @@ if __name__ == '__main__':
         mock_input = price_variance_deep_dive.create_input(
             arguments={
                 'time_periods': ['q3 2025'],
-                'other_filters': []
+                'other_filters': "category = 'cleaning'"
             }
         )
         print("Mock input created successfully")

@@ -97,8 +97,16 @@ def build_other_filters(parameters: SkillInput) -> str:
     if not filters or filters == ['None']:
         return ""
     
-    # Handle string format - assume it's already properly formatted SQL
+    # Handle string format - convert exact matches to LIKE for fuzzy matching
     if isinstance(filters, str):
+        # Handle "category = 'X'" pattern - convert to LIKE for fuzzy matching
+        if "category = '" in filters.lower():
+            import re
+            match = re.search(r"category\s*=\s*'([^']*)'", filters, re.IGNORECASE)
+            if match:
+                value = match.group(1)
+                return f" AND LOWER(category) LIKE '%{value.lower()}%'"
+        # Otherwise assume it's properly formatted
         return f" AND {filters}"
     
     # Handle list format

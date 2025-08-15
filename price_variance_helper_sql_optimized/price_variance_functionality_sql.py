@@ -309,6 +309,41 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
         'Catalog Price', 'Invoice Price', 'Expected Price', 'Price Compliance Rate'
     ])
     
+    # Generate insights using LLM before creating page variables
+    # Create fact dataframes for insights
+    supplier_facts = create_supplier_facts(supplier_df)
+    kpi_facts = create_kpi_facts(kpi_data)
+    contract_facts = create_contract_facts(contract_df, top_supplier) if not contract_df.empty else pd.DataFrame()
+    notes_df = create_notes_df(parameters)
+    
+    # Combine all facts for the prompts
+    insights_dfs = [
+        notes_df,
+        kpi_facts, 
+        supplier_facts,
+        contract_facts if not contract_facts.empty else pd.DataFrame()
+    ]
+    
+    # Convert dataframes to facts format for template rendering
+    facts = []
+    for i_df in insights_dfs:
+        if not i_df.empty:
+            facts.append(i_df.to_dict(orient='records'))
+    
+    # Render the insight_prompt template with facts
+    insight_template = jinja2.Template(parameters.arguments.insight_prompt).render(facts=facts)
+    
+    # Generate actual insights using LLM (like trend.py does)
+    from ar_analytics import ArUtils
+    ar_utils = ArUtils()
+    generated_insights = ar_utils.get_llm_response(insight_template)
+    
+    logger.info("🎯 GENERATED INSIGHTS:")
+    logger.info(f"{generated_insights}")
+    print("🎯 GENERATED INSIGHTS:")
+    print(f"{generated_insights}")
+    print("=" * 80)
+    
     # Page 1: Supplier Overview
     page1_vars = {
         "headline": "Price Variance Deep Dive",
@@ -333,8 +368,8 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
         "data": supplier_table_df.values.tolist() if not supplier_table_df.empty else [],
         "col_defs": [{"name": col} for col in supplier_table_df.columns] if not supplier_table_df.empty else [],
         
-        # Insights
-        "exec_summary": ""
+        # Insights - populated with LLM-generated content
+        "exec_summary": generated_insights if generated_insights else "No insights generated."
     }
     
     rendered_page1 = wire_layout(json.loads(parameters.arguments.page_1_layout), page1_vars)
@@ -382,7 +417,7 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
             "data": contract_table_df.values.tolist(),
             "col_defs": [{"name": col} for col in contract_table_df.columns],
             
-            "exec_summary": ""
+            "exec_summary": generated_insights if generated_insights else "No insights generated."
         }
         
         rendered_page2 = wire_layout(json.loads(parameters.arguments.page_2_layout), page2_vars)
@@ -538,6 +573,26 @@ def generate_visualizations(supplier_df: pd.DataFrame, contract_df: pd.DataFrame
     # Render the insight_prompt and max_prompt templates with facts
     insight_template = jinja2.Template(parameters.arguments.insight_prompt).render(facts=facts)
     max_response_prompt = jinja2.Template(parameters.arguments.max_prompt).render(facts=facts)
+    
+    # Debug: Log the rendered insight template to see what LLM gets
+    logger.info("🔍 RENDERED INSIGHT TEMPLATE:")
+    logger.info(f"{insight_template}")
+    
+    # Generate actual insights using LLM (like trend.py does)
+    from ar_analytics import ArUtils
+    ar_utils = ArUtils()
+    generated_insights = ar_utils.get_llm_response(insight_template)
+    
+    logger.info("🎯 GENERATED INSIGHTS:")
+    logger.info(f"{generated_insights}")
+    
+    # Debug: Also print for local testing
+    print("🔍 RENDERED INSIGHT TEMPLATE:")
+    print(f"{insight_template}")
+    print("=" * 80)
+    print("🎯 GENERATED INSIGHTS:")
+    print(f"{generated_insights}")
+    print("=" * 80)
     
     return SkillOutput(
         final_prompt=final_prompt,
